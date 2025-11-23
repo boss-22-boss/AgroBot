@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: agrobot
+    runtime: python
+    plan: free
+    region: frankfurt
+    branch: main
+    
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120 bot:app
+    
+    healthCheckPath: /health
+    
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      
+      # 🔒 Секретные переменные - устанавливаются в Render Dashboard
+      - key: BOT_TOKEN
+        sync: false
+      
+      - key: ADMIN_ID
+        sync: false
+      
+      - key: CHANNEL_USERNAME
+        sync: false
+      
+      - key: WEBAPP_URL
+        sync: false
+      
+      - key: RENDER_URL
+        sync: false
+      
+      - key: ADMIN_SECRET
+        sync: false
+      
+      # Опционально: можно изменить хэштег
+      - key: TRIGGER_HASHTAG
+        value: "#агрорф"
