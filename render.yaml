@@ -6,9 +6,13 @@ services:
     region: frankfurt
     branch: main
     
+    # Build Command - устанавливает зависимости
     buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    
+    # Start Command - запускает бот
     startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120 bot:app
     
+    # Health Check для мониторинга
     healthCheckPath: /health
     
     envVars:
