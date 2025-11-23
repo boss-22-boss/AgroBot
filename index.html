@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<title>Агросоюз - Каталог</title>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+			font-family: 'Roboto', Arial, sans-serif;
+		}
+
+		body {
+			background: #f5f5f5;
+			position: relative;
+			overflow-x: hidden;
+			touch-action: pan-y;
+			display: flex;
+			flex-direction: column;
+			min-height: 100vh;
+		}
+
+		body::before {
+			content: '';
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: url('https://agrosoyuznsk.ru/wp-content/uploads/2025/11/AdobeStock.jpg') no-repeat center center;
+			background-size: cover;
+			opacity: 0.65;
+			z-index: -1;
+		}
+
+		.header {
+			width: 100%;
+			height: 200px;
+			background: #3653ba;
+			position: relative;
+			margin-bottom: 0;
+		}
+
+		.back-button {
+			position: absolute;
+			left: 20px;
+			top: 50%;
+			transform: translateY(-50%);
+			background: #16BA00;
+			color: #ffffff;
+			border: none;
+			padding: 10px 20px;
+			border-radius: 8px;
+			cursor: none;
+			font-size: 16px;
+			display: none;
+			z-index: 10;
+		}
+
+		.back-button:active {
+			background: #336B54;
+		}
+
+		.logo {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			width: 320px;
+			height: 180px;
+			object-fit: contain;
+		}
+
+		.nav-buttons {
+			display: flex;
+			justify-content: center;
+			gap: 0;
+			margin-top: 0;
+			width: 100%;
+		}
+
+		.nav-button {
+			padding: 15px 40px;
+			border: none;
+			background: #3653ba;
+			color: white;
+			font-size: 18px;
+			font-weight: 500;
+			cursor: none;
+			transition: all 0.3s;
+			text-transform: uppercase;
+			flex: 1;
+		}
+
+		.nav-button:first-child {
+			border-bottom-left-radius: 30px;
+		}
+
+		.nav-button:last-child {
+			border-bottom-right-radius: 30px;
+		}
+
+		.nav-button.active {
+			background: #16BA00;
+		}
+
+		.nav-button:active {
+			transform: scale(0.98);
+		}
+
+		.container {
+			max-width: 1400px;
+			margin: 20px auto 0;
+			padding: 20px;
+			display: flex;
+			justify-content: center;
+			flex: 1;
+		}
+
+		.products-grid {
+			display: flex;
+			flex-direction: column;
+			gap: 30px;
+			align-items: center;
+			width: 100%;
+		}
+
+		.product-card {
+			width: 600px;
+			height: 600px;
+			border-radius: 30px;
+			overflow: hidden;
+			position: relative;
+			cursor: none;
+			transition: transform 0.3s;
+			box-shadow: 0 0 30px rgba(253, 253, 241, 0.6);
+		}
+
+		.product-card:active {
+			transform: scale(0.98);
+		}
+
+		.product-card img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+
+		.product-card-overlay {
+			position: absolute;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			background: rgba(54, 83, 186, 0.85);
+			padding: 20px;
+			text-align: center;
+		}
+
+		.product-card-title {
+			font-size: 24px;
+			font-weight: 600;
+			color: #ffffff;
+		}
+
+		/* Стили для обычной сетки товаров (удобрения и техника) */
+		.products-grid.grid-layout {
+			display: grid;
+			grid-template-columns: repeat(2, 1fr);
+			gap: 30px;
+			max-width: 500px;
+			margin: 0 auto;
+			place-items: center;
+		}
+
+		.products-grid.grid-layout .product-card {
+			width: 200px;
+			height: 200px;
+			background: #fff;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			padding: 20px;
+			box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+			text-decoration: none;
+		}
+
+		.products-grid.grid-layout .product-card:visited {
+			color: inherit;
+		}
+
+		.products-grid.grid-layout .product-card img {
+			width: 60%;
+			height: 60%;
+			object-fit: contain;
+			margin-bottom: 15px;
+		}
+
+		.products-grid.grid-layout .product-card-overlay {
+			position: static;
+			background: transparent;
+			padding: 0;
+		}
+
+		.products-grid.grid-layout .product-card-title {
+			font-size: 14px;
+			color: #34495e;
+		}
+
+		/* Детальная страница теплицы */
+		.detail-view {
+			display: none;
+			max-width: 800px;
+			margin: 0 auto;
+			padding: 20px;
+		}
+
+		.detail-view.active {
+			display: block;
+		}
+
+		.detail-image {
+			width: 100%;
+			max-width: 600px;
+			margin: 0 auto 30px;
+			border-radius: 30px;
+			box-shadow: 0 0 30px rgba(253, 253, 241, 0.6);
+		}
+
+		.detail-description {
+			background: rgba(54, 83, 186, 0.85);
+			padding: 30px;
+			border-radius: 20px;
+			margin-bottom: 30px;
+		}
+
+		.detail-description h2 {
+			font-size: 28px;
+			margin-bottom: 20px;
+			color: #ffffff;
+		}
+
+		.detail-description p {
+			font-size: 18px;
+			line-height: 1.6;
+			color: #ffffff;
+			margin-bottom: 15px;
+		}
+
+		.order-button {
+			display: block;
+			width: 100%;
+			max-width: 400px;
+			margin: 0 auto;
+			padding: 20px;
+			background: #3653ba;
+			color: white;
+			border: none;
+			border-radius: 15px;
+			font-size: 20px;
+			font-weight: 600;
+			cursor: none;
+			text-decoration: none;
+			text-align: center;
+			transition: all 0.3s;
+		}
+
+		.order-button:active {
+			background: #5A9AB0;
+			transform: scale(0.98);
+		}
+
+		.footer {
+			background: #3653ba;
+			padding: 30px 20px;
+			text-align: center;
+			margin-top: 50px;
+		}
+
+		.footer-title {
+			font-size: 20px;
+			font-weight: 600;
+			color: #ffffff;
+			margin-bottom: 15px;
+		}
+
+		.footer-contacts a {
+			display: block;
+			color: #ffffff;
+			text-decoration: none;
+			margin-bottom: 10px;
+			font-size: 18px;
+		}
+
+		.footer-contacts a:hover {
+			text-decoration: underline;
+		}
+
+		.hidden {
+			display: none !important;
+		}
+
+		/* Адаптивность */
+		@media (max-width: 768px) {
+			.header {
+				height: 120px;
+			}
+
+			.logo {
+				width: 200px;
+				height: 112px;
+			}
+
+			.nav-button {
+				padding: 10px 20px;
+				font-size: 14px;
+			}
+
+			.product-card {
+				width: 85vw;
+				max-width: 450px;
+				height: 85vw;
+				max-height: 450px;
+			}
+
+			.product-card-title {
+				font-size: 18px;
+			}
+
+			.products-grid.grid-layout {
+				gap: 20px;
+				padding: 0 20px;
+				justify-content: center;
+				max-width: 100%;
+				grid-template-columns: repeat(2, minmax(140px, 150px));
+			}
+
+			.products-grid.grid-layout .product-card {
+				width: 150px;
+				height: 150px;
+				padding: 15px;
+				margin: 0;
+			}
+
+			.products-grid.grid-layout .product-card-title {
+				font-size: 12px;
+			}
+
+			.detail-description h2 {
+				font-size: 20px;
+			}
+
+			.detail-description p {
+				font-size: 14px;
+			}
+
+			.order-button {
+				font-size: 16px;
+				padding: 12px;
+			}
+
+			.back-button {
+				left: 10px;
+				padding: 8px 12px;
+				font-size: 12px;
+			}
+
+			.footer {
+				padding: 20px 15px;
+			}
+
+			.footer-title {
+				font-size: 16px;
+				margin-bottom: 10px;
+			}
+
+			.footer-contacts a {
+				font-size: 14px;
+				margin-bottom: 8px;
+			}
+		}
+
+		@media (max-width: 480px) {
+			.header {
+				height: 100px;
+			}
+
+			.logo {
+				width: 160px;
+				height: 90px;
+			}
+
+			.nav-button {
+				padding: 8px 12px;
+				font-size: 11px;
+			}
+
+			.products-grid.grid-layout {
+				gap: 15px;
+				justify-content: center;
+				max-width: 100%;
+				grid-template-columns: repeat(2, minmax(120px, 130px));
+			}
+
+			.products-grid.grid-layout .product-card {
+				width: 130px;
+				height: 130px;
+				padding: 10px;
+			}
+
+			.products-grid.grid-layout .product-card-title {
+				font-size: 11px;
+			}
+
+			.footer {
+				padding: 15px 10px;
+			}
+
+			.footer-title {
+				font-size: 14px;
+				margin-bottom: 8px;
+			}
+
+			.footer-contacts a {
+				font-size: 12px;
+				margin-bottom: 6px;
+			}
+		}
+	</style>
+</head>
+
+<body>
+	<header class="header">
+		<button class="back-button" id="backButton" onclick="goBack()">Назад</button>
+		<a href="https://agrosoyuznsk.ru/"><img src="https://agrosoyuznsk.ru/wp-content/uploads/2024/11/logo-agroV6.svg" alt="Агросоюз" class="logo"></a>
+	</header>
+
+	<div class="nav-buttons">
+		<button class="nav-button" data-category="greenhouses">Теплицы</button>
+		<button class="nav-button active" data-category="fertilizers">Удобрения</button>
+		<button class="nav-button" data-category="equipment">Техника</button>
+	</div>
+
+	<div class="container">
+		<!-- Теплицы -->
+		<div id="greenhouses-list" class="products-grid hidden">
+			<div class="product-card" onclick="showDetail(0)">
+				<img src="https://sun9-7.userapi.com/s/v1/ig2/1qYwV6k4h4NUiQ0z58l-6ksA1dwDRXlIv-Jvg7lT7wE3SZa7N5qy4n3e8ngFXlS4wfkB44_Nay6FADPNO-ncFpak.jpg?quality=95&as=32x19,48x28,72x42,108x63,160x93,240x140,360x210,480x280,540x315,640x374,720x421,772x451&from=bu&u=z8j2bzH6z_HfJ3wWYsDA4JMQQaLKfHYKpSvXRN4TNkU" alt="Вертикальная гидропонная посадочная система">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Вертикальная гидропонная посадочная система</div>
+				</div>
+			</div>
+			<div class="product-card" onclick="showDetail(1)">
+				<img src="https://sun9-31.userapi.com/s/v1/ig2/PMAA8-bWxYVlPkecM2Dey-ppoouevFAoxUQ80y6VoV_P5Qt7Oh6ZOxD9X64-wB3Smw9Mg-I52U1v1nM2n7fXiuIr.jpg?quality=95&as=32x24,48x36,72x55,108x82,160x122,240x182,360x273,480x365,540x410,640x486,707x537&from=bu&u=6PBlrTOJQ0wuTLnr8VvE2EzSux-LxSUa85n5M1ORUsk" alt="Гидропонная посадочная система">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Гидропонная посадочная система</div>
+				</div>
+			</div>
+			<div class="product-card" onclick="showDetail(2)">
+				<img src="https://sun9-56.userapi.com/s/v1/ig2/6hMVqaba2Tx26vq81HE4IMHq62aXLQ-fbws18KlsEjeUd4l1IA38cJVupknVJ57c7vEgngLyanDSl-bAvnACX0NC.jpg?quality=95&as=32x32,48x47,72x71,108x107,160x158,240x237,360x356,480x474,482x476&from=bu&u=n9TOtfaPnFBkI3FHmc2mQUpegnpLKxd3tnZRRehuICE&cs=482x0" alt="Гидропонная посадочная система «А» образная">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Гидропонная посадочная система «А» образная</div>
+				</div>
+			</div>
+			<div class="product-card" onclick="showDetail(3)">
+				<img src="https://sun9-8.userapi.com/s/v1/ig2/U_VO7J7I2_rsGrbQPltGmWBWz7MyLxhKsSHQDNSV5n-HBg-aEnBkiTx1Yqi0xYG2BNP4YvCfkfzO-UqyfsoEMhli.jpg?quality=95&as=32x43,48x64,72x96,108x144,160x213,240x320,360x480,480x640,540x720,640x853,720x960,1080x1440,1280x1707,1440x1920,1920x2560&from=bu&u=BbmE2zDn5SxO8_UuGYHPDcfZbCUnrYHS_q5Zt5l34zg&cs=540x0" alt="Система посадки на гребне с использованием кокосового волокнистого субстрата">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Система посадки на гребне с использованием кокосового волокнистого
+						субстрата</div>
+				</div>
+			</div>
+			<div class="product-card" onclick="showDetail(4)">
+				<img src="https://sun9-28.userapi.com/s/v1/ig2/52I5evAJqmp5PLQ5GNN51EalFot8HzNUCWNtyXc_BtHWcqaS63DgL4SfnByArgdu3IITfjtEWPGoBMJsSr3jwXFR.jpg?quality=95&as=32x23,48x35,72x52,108x79,160x116,240x175,360x262,480x349,540x393,640x466,697x507&from=bu&u=mNXytGUKZBY1g7GmM5qRTHESfLRCPGK7nSHXMTJOYLw" alt="Однопленочная теплица">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Однопленочная теплица</div>
+				</div>
+			</div>
+			<div class="product-card" onclick="showDetail(5)">
+				<img src="https://sun9-7.userapi.com/s/v1/ig2/XiW4Lji3BHjXFB1iG-uJuEq-2DekScleAuHBjVE1_a1qpXT04RnKiwJOGCZLAgjL6NDYy75gSIpqwZlZ17mi_MRI.jpg?quality=95&as=32x20,48x29,72x44,108x66,160x98,240x146,360x220,480x293,540x330,640x391,720x439,1080x659,1280x781,1437x877&from=bu&u=wcPwaucqaZgHG3fipgug9aixD6wjVstv4zgZ7jpNhBY&cs=1080x0" alt="Теплоизоляционная пленочная теплица "Канада"">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Теплоизоляционная пленочная теплица "Канада"</div>
+				</div>
+			</div>
+			<div class="product-card" onclick="showDetail(6)">
+				<img src="https://sun9-20.userapi.com/s/v1/ig2/tcfMyKCWeJf9Wx9_j5kBLz6oKw5UjPx843KkOEZj6ZrCTyf07sdKyKCvnKrni5MGnUioSeUy8PzwSVEnAXw0AL6T.jpg?quality=95&as=32x34,48x50,72x76,108x114,160x168,240x252,360x379,480x505,540x568,640x673,715x752&from=bu&u=WLg5bujuw7Fa9SD0y2A9cgKum0VWgPv9cWIpYcVyi0I&cs=540x0" alt="Широкопролётная утеплённая теплица">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Широкопролётная утеплённая теплица</div>
+				</div>
+			</div>
+			<div class="product-card" onclick="showDetail(7)">
+				<img src="https://sun9-63.userapi.com/s/v1/ig2/PggK6hw519eTTVRf78L1aeS6Bjz4ScfIoabpuJbT9PBovWWAsXwa-HjqNGX2Z3ob5gPeJNn9iZBzLUkrBagZy21s.jpg?quality=95&as=32x24,48x36,72x54,108x81,160x120,240x180,360x270,480x360,540x405,640x480,720x540,1080x810,1280x960,1440x1080,2560x1920&from=bu&u=eLGHv-DRAYp7La3iVYYR_hU9SrVxpGShvst-awPRlRI&cs=1080x0" alt="Многопролётная теплица с плёночным покрытием">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Многопролётная теплица с плёночным покрытием</div>
+				</div>
+			</div>
+			<div class="product-card" onclick="showDetail(8)">
+				<img src="https://sun9-71.userapi.com/s/v1/ig2/d81iv0NDBmRYhqDGlWSZaKAdpQesHRdeET77MaIlo7sVZZG0lBytKCGnM0-jBnMKpZeNuOj4SvvlkMyvR6vXl9zR.jpg?quality=95&as=32x22,48x32,72x49,108x73,160x108,240x162,360x243,480x324,540x365,640x432,720x486,948x640&from=bu&u=rYhJ8szlmHfJ5yGlWDjheBVagW92FmAHDgcMywiL5sw" alt="Теплица из поликарбоната">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Теплица из поликарбоната</div>
+				</div>
+			</div>
+			<div class="product-card" onclick="showDetail(9)">
+				<img src="https://sun9-12.userapi.com/s/v1/ig2/R18J0hb-Ob1H4OHxOw0vW7XooKIQF2uqFPeMUobZjKuKbf5OmyTcczBDhES8rdGtIpuVtRl3azFNiJMbsDSZJ3FW.jpg?quality=95&as=32x22,48x33,72x49,108x74,160x109,240x163,360x245,480x327,540x368,640x436,720x490,1080x736,1280x872&from=bu&u=wBU0aE2z5VJwFGseLGPW3HzJPp_Zl5ItKDwwOVC_GHk&cs=1080x0" alt="Стеклянная теплица">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Стеклянная теплица</div>
+				</div>
+			</div>
+			<div class="product-card" onclick="showDetail(10)">
+				<img src="https://sun9-12.userapi.com/s/v1/ig2/MKuf_bOJJyx0Q6wS2qZ1obDcltanzrCeolI8XArrqWIFthjIlzgT9VzxlzXveUuJ9LQIzlTO9qkTV5-h6GQbpv9W.jpg?quality=95&as=32x24,48x37,72x55,108x83,160x122,240x184,360x275,480x367,540x413,640x490,694x531&from=bu&u=DYBV_k-kiHWb0q6StKWxQjLq5cQdEYa3xE3dKx_3i3E" alt="Система беспочвенного выращивания на кокосовом субстрате">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Система беспочвенного выращивания на кокосовом субстрате</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Детальный вид теплицы -->
+		<div id="greenhouse-detail" class="detail-view">
+			<img id="detail-image" class="detail-image" src="" alt="">
+			<div class="detail-description">
+				<h2 id="detail-title"></h2>
+				<p id="detail-text"></p>
+			</div>
+			<a href="tel:+79134722066" class="order-button">Заказать</a>
+		</div>
+
+		<!-- Удобрения -->
+		<div id="fertilizers-list" class="products-grid grid-layout">
+			<a href="https://agrosoyuznsk.ru/product/mineralnye-udobreniya/ammonium-nitrate/" class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2025/09/img-товар-на-подложке-2.png" alt="Аммиачная селитра">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Аммиачная селитра</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/mineralnye-udobreniya/carbamide/" class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2025/09/img-товар-на-подложке-3.png" alt="Карбамид (мочевина)">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Карбамид (мочевина)</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/npk-udobreniya/nitroammophoska-azofoska/" class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2025/09/img-товар-на-подложке-7.png" alt="Нитроаммофоска (Азофоска)">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Нитроаммофоска (Азофоска)</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/mineralnye-udobreniya/ammonium-sulfate-granular/"
+				class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2025/09/img-товар-на-подложке-8.png" alt="Сульфат аммония">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Сульфат аммония</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/mineralnye-udobreniya/potassium-chloride-60-fine/"
+				class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2025/09/CaliyHlor60.png" alt="Калий хлористый 60%">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Калий хлористый 60%</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/mineralnye-udobreniya/potassium-chloride-60-granulated/"
+				class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2025/09/img-товар-на-подложке-10.png" alt="Калий хлористый 60%">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Калий хлористый 60%</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/mineralnye-udobreniya/crushed-potassium-chloride-40/"
+				class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2025/09/img-товар-на-подложке-9.png" alt="Калий хлорид дробленный 40%">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Калий хлорид дробленный 40%</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/mineralnye-udobreniya/ammonium-sulfate-nitrate/"
+				class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2025/09/img-товар-на-подложке-6.png" alt="Сульфат-нитрат аммония N:S (26:13)">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Сульфат-нитрат аммония N:S (26:13)</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/mineralnye-udobreniya/ammonium-sulfate/" class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2025/09/img-товар-на-подложке-4.png" alt="СУЛЬФАТ АММОНИЯ">
+				<div class="product-card-overlay">
+					<div class="product-card-title">СУЛЬФАТ АММОНИЯ</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/mineralnye-udobreniya/sulfat_magniya_7_vodniy/"
+				class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2024/04/img-товар-на-подложке-2.png" alt="МАГНИЙ СЕРНОКИСЛЫЙ 7-ВОДНЫЙ">
+				<div class="product-card-overlay">
+					<div class="product-card-title">СУЛЬФАТ МАГНИЯ 7-ВОДНЫЙ</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/mineralnye-udobreniya/nitrat-kaliya-marki-a/" class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2024/04/img-товар-на-подложке-23-1.png" alt="НИТРАТ КАЛИЯ">
+				<div class="product-card-overlay">
+					<div class="product-card-title">НИТРАТ КАЛИЯ</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/mineralnye-udobreniya/epsom-salt/" class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2025/07/epsomsalt.png" alt="Английская соль">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Английская соль</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/biokley/unikley-dlya-rapsa-i-gorokha/" class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2024/04/img-товар-на-подложке-58.png" alt="Униклей для рапса и гороха">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Униклей для рапса и гороха</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/biokley/liposamklei/" class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2024/05/img-товар-на-подложке-48.png" alt="Липосам Биоклей">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Липосам Биоклей</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/mineralnye-udobreniya/ammonium-calcium-nitrate-grade-a-premium/"
+				class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2024/06/img-товар-на-подложке-27.png" alt="НИТРАТ КАЛЬЦИЯ">
+				<div class="product-card-overlay">
+					<div class="product-card-title">НИТРАТ КАЛЬЦИЯ</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/stubble-destructors/eco/" class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2024/05/img-товар-на-подложке-55.png" alt="Экостерн">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Экостерн</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/mineralnye-udobreniya/potassium-sulfate-solupotasse/"
+				class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2024/06/img-товар-на-подложке-30.png" alt="Сульфат Калия">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Сульфат Калия</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/mineralnye-udobreniya/monokalium-phosphate-haifa/"
+				class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2024/06/img-товар-на-подложке-29.png" alt="Монокалий фосфат">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Монокалий фосфат</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/mineralnye-udobreniya/potassium-nitrate-multi-to-gg/"
+				class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2024/06/img-товар-на-подложке-28.png" alt="Нитрат калия Multi-К GG">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Нитрат калия Multi-К GG</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/stubble-destructors/ecosterntill/" class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2024/05/img-товар-на-подложке-49.png" alt="Экостерн NO TILL">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Экостерн NO TILL</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/fungitsidy/fitohelp/" class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2024/05/img-товар-на-подложке-56.png" alt="Фитохелп">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Фитохелп</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/fungitsidy/mikohelp/" class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2024/05/img-товар-на-подложке-57.png" alt="Микохелp">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Микохелп</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/biokley/liposam/" class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2024/05/img-товар-на-подложке-47.png" alt="Биоприлипатель Липосам">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Биоприлипатель Липосам</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/biokley/prilipatel/" class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2024/05/img-товар-на-подложке-46.png" alt="Прилипатель «Униклей»">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Прилипатель «Униклей»</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/mycorrhizal-preparations/mfrend/" class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2024/05/img-товар-на-подложке-52.png" alt="Микофренд">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Микофренд</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/rc-mobilizers/groundfix/" class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2024/05/img-товар-на-подложке-53.png" alt="Граундфикс">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Граундфикс</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/stimulyatory-i-regulyatory-rosta/bio-gumat/" class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2024/04/img-товар-на-подложке-54.png" alt="Био Гумат">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Био Гумат</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/stimulyatory-i-regulyatory-rosta/uni/" class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2024/05/img-товар-на-подложке-59.png" alt="Универсальный Биокомплекс">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Универсальный Биокомплекс</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/stimulyatory-i-regulyatory-rosta/bioazot/" class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2024/05/img-товар-на-подложке-51.png" alt="Биоазот">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Биоазот</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/fungitsidy/btueat/" class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2024/05/img-товар-на-подложке-50.png" alt="Биозащита от болезней Биокомплекс">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Биозащита от болезней Биокомплекс</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/npk-udobreniya/fertilizer-npk-202020-me-2/" class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2025/02/img-товар-на-подложке-14.png" alt="NPK 20:20:20 + ME">
+				<div class="product-card-overlay">
+					<div class="product-card-title">NPK 20:20:20 + ME</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/npk-udobreniya/npk-134013-me/" class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2025/02/img-товар-на-подложке-14.png" alt="NPK 13:40:13 + ME">
+				<div class="product-card-overlay">
+					<div class="product-card-title">NPK 13:40:13 + ME</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/npk-udobreniya/fertilizer-npk-181818-3mgo-me/"
+				class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2025/02/img-товар-на-подложке-14.png" alt="NPK 18:18:18 + 3MgO + ME">
+				<div class="product-card-overlay">
+					<div class="product-card-title">NPK 18:18:18 + 3MgO + ME</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/npk-udobreniya/fertilizer-npk-151530-mgo-me/" class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2025/02/img-товар-на-подложке-14.png" alt="NPK 15:15:30 + MgO + ME">
+				<div class="product-card-overlay">
+					<div class="product-card-title">NPK 15:15:30 + MgO + ME</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/npk-udobreniya/fertilizer-npk-12831-2mgo-me/" class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2025/02/img-товар-на-подложке-14.png" alt="NPK 12:8:31 + 2MgO + ME">
+				<div class="product-card-overlay">
+					<div class="product-card-title">NPK 12:8:31 + 2MgO + ME</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/npk-udobreniya/npk-fertilizer-31138-4mgo-me/" class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2025/02/img-товар-на-подложке-14.png" alt="NPK 3:11:38 + 4MgO + 8S + ME">
+				<div class="product-card-overlay">
+					<div class="product-card-title">NPK 3:11:38 + 4MgO + 8S + ME</div>
+				</div>
+			</a>
+
+			<a href="https://agrosoyuznsk.ru/product/npk-udobreniya/fertilizer-npk-61435-2mgo-me/" class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2025/02/img-товар-на-подложке-14.png" alt="NPK 6:14:35 + 2MgO + ME">
+				<div class="product-card-overlay">
+					<div class="product-card-title">NPK 6:14:35 + 2MgO + ME</div>
+				</div>
+			</a>
+		</div>
+
+		<!-- Техника -->
+		<div id="equipment-list" class="products-grid grid-layout hidden">
+			<a href="https://agrosoyuznsk.ru/product/agro-robots/lawn-mower-remote/" class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2025/09/img-товар-на-подложке-1.png" alt="Газонокосилка">
+				<div class="product-card-overlay">
+					<div class="product-card-title">Газонокосилка</div>
+				</div>
+			</a>
+			<a href="https://agrosoyuznsk.ru/product/agro-robots/mq-м200/" class="product-card">
+				<img src="https://agrosoyuznsk.ru/wp-content/uploads/2025/09/img-товар-на-подложке.png" alt="MQ М200">
+				<div class="product-card-overlay">
+					<div class="product-card-title">MQ М200</div>
+				</div>
+			</a>
+		</div>
+	</div>
+
+	<footer class="footer">
+		<div class="footer-title">КОНТАКТЫ ДЛЯ СВЯЗИ</div>
+		<div class="footer-contacts">
+			<a href="tel:+79994687102">+7 (999) 468-71-02</a>
+			<a href="tel:+79513867102">+7 (951) 386-71-02</a>
+			<a href="mailto:agrosoyuznsk@mail.ru">agrosoyuznsk@mail.ru</a>
+		</div>
+	</footer>
+
+	<script>
+		const greenhousesData = [
+            {
+                title: 'Вертикальная гидропонная посадочная система',
+                image: 'https://sun9-7.userapi.com/s/v1/ig2/1qYwV6k4h4NUiQ0z58l-6ksA1dwDRXlIv-Jvg7lT7wE3SZa7N5qy4n3e8ngFXlS4wfkB44_Nay6FADPNO-ncFpak.jpg?quality=95&as=32x19,48x28,72x42,108x63,160x93,240x140,360x210,480x280,540x315,640x374,720x421,772x451&from=bu&u=z8j2bzH6z_HfJ3wWYsDA4JMQQaLKfHYKpSvXRN4TNkU',
+                description: 'Наша вертикальная гидропонная система — это не просто набор, а законченная экосистема для гарантированногорезультата.<br>Мы разработали комплекс, в котором все продумано до мелочей:<b><br><br>Прочная конструкция</b><br>Прочная конструкция<br>Вертикальные стойки с резервуарами из пищевого ПВХ надежны и долговечны.<br><br><b>Идеальная среда для корней</b><br>Специальные покрытия создают идеальные условия для быстрого развития салата, зелени и даже плодовых культур.<br><br><b>Сердце системы — фертигация</b><br>Автоматическая подача обогащенного питательными веществами раствора. Растения получают всё необходимое без стресса и растут с невероятной скоростью.<br><br>Здоровье, экологичность и эстетика в одном решении. Начни выращивать по-новому!'
+            },
+            {
+                title: 'Гидропонная посадочная система',
+                image: 'https://sun9-31.userapi.com/s/v1/ig2/PMAA8-bWxYVlPkecM2Dey-ppoouevFAoxUQ80y6VoV_P5Qt7Oh6ZOxD9X64-wB3Smw9Mg-I52U1v1nM2n7fXiuIr.jpg?quality=95&as=32x24,48x36,72x55,108x82,160x122,240x182,360x273,480x365,540x410,640x486,707x537&from=bu&u=6PBlrTOJQ0wuTLnr8VvE2EzSux-LxSUa85n5M1ORUsk',
+                description: '<b>Наша гидропонная посадочная система</b> — это готовое решение для создания продуктивного и рентабельного выращивания зелени, овощей и ягод в контролируемых условиях.<br><br>Мы предлагаем комплексный подход, который включает:<br><br><b>Выращивание ключевых культур:</b><br><br>Листовые овощи: салат, шпинат, руккола, мизуна.<br>Зелень: сельдерей, кинза, базилик, укроп.<br>Другие культуры: рапс на микрозелень, земляника, острый перец и многое другое.<br><br><b>Надежная и продуманная конструкция:</b><b>Плоские посадочные стойки</b><br>Эргономичная конструкция для удобного обслуживания и максимального использования пространства.<br><br><b>ПВХ гидропонные резервуары</b><br>Прочные, долговечные и безопасные для питательного раствора емкости.<br><br></b>Специализированные грунтовые покрытия</b><br>Оптимальная среда для развития корневой системы и защиты от испарения и света.<br><br></b>«Мозг» системы — прецизионная фертигация:</b><br><br>Автоматизированная подача воды и питательных веществ точно в нужное время и в нужной пропорции.<br><br>Идеальный баланс макро- и микроэлементов для здоровья растений и быстрого роста.<br><br>Значительная экономия воды и удобрений по сравнению с традиционными методами.<br><br>'
+            },
+            {
+                title: 'Гидропонная посадочная система «А» образная',
+                image: 'https://sun9-56.userapi.com/s/v1/ig2/6hMVqaba2Tx26vq81HE4IMHq62aXLQ-fbws18KlsEjeUd4l1IA38cJVupknVJ57c7vEgngLyanDSl-bAvnACX0NC.jpg?quality=95&as=32x32,48x47,72x71,108x107,160x158,240x237,360x356,480x474,482x476&from=bu&u=n9TOtfaPnFBkI3FHmc2mQUpegnpLKxd3tnZRRehuICE&cs=482x0',
+                description: 'Профессиональное решение для круглогодичного выращивания листовых овощей и плодовых культур. Наша «А»-образная система позволяет получать максимальные урожаи с минимальной занимаемой площадью.<br><br><b>Что выращиваем</b><br>Салат, сельдерей, рапс, пряные травы и многое другое.<br><br><b>Конструкция</b><br>Прочная А-образная рама, ПВЦ-резервуары и специализированные покрытия для оптимального роста.<br><br><b>Подача питания</b><br>Прецизионная система фертигации, которая автоматически подает воду и удобрения.'
+            },
+            {
+                title: 'Система посадки на гребне с использованием кокосового волокнистого субстрата',
+                image: 'https://sun9-8.userapi.com/s/v1/ig2/U_VO7J7I2_rsGrbQPltGmWBWz7MyLxhKsSHQDNSV5n-HBg-aEnBkiTx1Yqi0xYG2BNP4YvCfkfzO-UqyfsoEMhli.jpg?quality=95&as=32x43,48x64,72x96,108x144,160x213,240x320,360x480,480x640,540x720,640x853,720x960,1080x1440,1280x1707,1440x1920,1920x2560&from=bu&u=BbmE2zDn5SxO8_UuGYHPDcfZbCUnrYHS_q5Zt5l34zg&cs=540x0',
+                description: '<b>Почему фермеры выбирают нашу систему?</b><br><br>Здоровье корней и урожая: Кокосовый субстрат — это естественная защита от корневой гнили и идеальная среда для развития сильной корневой системы.<br><br>Экономическая эффективность: Низкая стартовая стоимость по сравнению с другими технологиями и значительная экономия воды и удобрений за счет системы точной фертигации.<br><br>Универсальность и гибкость: Система легко адаптируется под разные культуры – от томатов и огурцов до клубники и перца. Подвесные системы экономят пространство и облегчают труд.<br><br>Ранние урожаи и защита: Утепленные лотки позволяют раньше начинать сезон и защищают ваши инвестиции от непредвиденных заморозков.<br><br><b>Что вы получаете?</b><br><br><b>Готовую технологию выращивания «под ключ».</b><br><b>Оборудование: утепленные лотки, покрытия, подвесные системы.</b><br><b>Материалы: качественный кокосовый субстрат.</b><br><b>Автоматику: прецизионную систему фертигации.</b>'
+            },
+            {
+                title: 'Однопленочная теплица',
+                image: 'https://sun9-28.userapi.com/s/v1/ig2/52I5evAJqmp5PLQ5GNN51EalFot8HzNUCWNtyXc_BtHWcqaS63DgL4SfnByArgdu3IITfjtEWPGoBMJsSr3jwXFR.jpg?quality=95&as=32x23,48x35,72x52,108x79,160x116,240x175,360x262,480x349,540x393,640x466,697x507&from=bu&u=mNXytGUKZBY1g7GmM5qRTHESfLRCPGK7nSHXMTJOYLw',
+                description: 'Хотите быстро начать выращивание и контролировать бюджет? Наша однопленочная теплица — это разумный старт для вашего агробизнеса. Вы получаете надежную защиту для ваших культур в самый продуктивный сезон без лишних затрат.<br><br><b>Что вы получаете?</b><br><br><b>Защищенный грунт</b><br>Ваши растения под надежной пленкой, не боятся непогоды.<br><br><b>Автоматическая вентиляция</b><br>Отверстия внизу теплицы сами создают тягу и охлаждают воздух без вашего участия.<br><br><b>Минимум вложений</b><br>Самая выгодная цена на рынке за квадратный метр.<br><br><b>Быстрый запуск</b><br>Собирается за несколько дней.<br><br><b>Данная модель — сезонное решение.</b> Она не предназначена для зимнего выращивания из-за отсутствия обогрева, а пленочное покрытие потребует замены в среднем через 6 лет службы.'
+            },
+            {
+                title: 'Теплоизоляционная пленочная теплица "Канада"',
+                image: 'https://sun9-7.userapi.com/s/v1/ig2/XiW4Lji3BHjXFB1iG-uJuEq-2DekScleAuHBjVE1_a1qpXT04RnKiwJOGCZLAgjL6NDYy75gSIpqwZlZ17mi_MRI.jpg?quality=95&as=32x20,48x29,72x44,108x66,160x98,240x146,360x220,480x293,540x330,640x391,720x439,1080x659,1280x781,1437x877&from=bu&u=wcPwaucqaZgHG3fipgug9aixD6wjVstv4zgZ7jpNhBY&cs=1080x0',
+                description: 'Забудьте о сезонных ограничениях! Теплица «Канада» — это ваша собственная фабрика по производству свежих овощей 365 дней в году.<br><br>Мы объединили прочность каркаса, интеллектуальную вентиляцию и мощную систему охлаждения, чтобы вы получали стабильно высокий доход.<br><br><b>Почему «Канада» — это выгодная инвестиция?</b><br><br><b>Работайте и зимой, и летом</b><br>Теплоизоляция сохраняет тепло в морозы, а система вентиляторного занавеса спасает от жары. Вы диктуете погоду сами!<br><br><b>Прочность и пространство</b><br>Усиленная конструкция выдерживает снег и ветер, а свободное пространство без опор позволяет использовать любую технику и увеличивать плотность посадки.<br><br><b>Идеальный климат для растений</b><br>Автоматизированная вентиляция и охлаждение создают идеальные условия, предотвращая болезни и стимулируя рост.'
+            },
+            {
+                title: 'Широкопролётная утеплённая теплица',
+                image: 'https://sun9-20.userapi.com/s/v1/ig2/tcfMyKCWeJf9Wx9_j5kBLz6oKw5UjPx843KkOEZj6ZrCTyf07sdKyKCvnKrni5MGnUioSeUy8PzwSVEnAXw0AL6T.jpg?quality=95&as=32x34,48x50,72x76,108x114,160x168,240x252,360x379,480x505,540x568,640x673,715x752&from=bu&u=WLg5bujuw7Fa9SD0y2A9cgKum0VWgPv9cWIpYcVyi0I&cs=540x0',
+                description: 'Современная крупнопролётная теплица с усиленной конструкцией и интеллектуальной системой климат-контроля. Идеально подходит для фермерских хозяйств и агропредприятий, ориентированных на стабильное производство овощей в течение всего года.<br><br><b>Конструктивные особенности:</b><br>• Пролёт: 12-20 метров с арочной геометрией крыши<br>• Покрытие: Двухслойная теплоизолирующая плёнка с наружным водонепроницаемым слоем<br>• Вентиляция: Система верхних и нижних фрамуг для естественной конвекции воздуха<br>• Охлаждение: Вентиляторный увлажняющий занавес для поддержания микроклимата<br><br><b>Ключевые преимущества:</b><br>✓ Прочность и надёжность — усиленный каркас выдерживает экстремальные погодные условия<br>✓ Эффективная теплоизоляция — сохраняет до 40% больше тепла compared с обычными плёночными теплицами<br>✓ Круглогодичная эксплуатация — возможность выращивания культур даже в зимний период<br>✓ Оптимизация пространства — отсутствие внутренних опор позволяет использовать современную технику<br>✓ Автоматический климат-контроль — интеллектуальное управление температурой и влажностью'
+            },
+            {
+                title: 'Многопролётная теплица с плёночным покрытием',
+                image: 'https://sun9-63.userapi.com/s/v1/ig2/PggK6hw519eTTVRf78L1aeS6Bjz4ScfIoabpuJbT9PBovWWAsXwa-HjqNGX2Z3ob5gPeJNn9iZBzLUkrBagZy21s.jpg?quality=95&as=32x24,48x36,72x54,108x81,160x120,240x180,360x270,480x360,540x405,640x480,720x540,1080x810,1280x960,1440x1080,2560x1920&from=bu&u=eLGHv-DRAYp7La3iVYYR_hU9SrVxpGShvst-awPRlRI&cs=1080x0',
+                description: 'Современная многопролётная теплица с комплексным оснащением для круглогодичного выращивания овощных культур. Оптимальное сочетание функциональности и экономической эффективности для фермерских хозяйств и сельхозпредприятий.<br><br><b>Технические характеристики:</b><br><br><b>Конструкция: многопролётная с арочной крышей</b><br>Пролёт: 8 м (ширина секции 4 м)<br>Покрытие: двухслойная плёнка с теплоизоляцией<br>Управление: комплексная электрическая система контроля параметров<br><br><b>Ключевые возможности:</b><br>• Климат-контроль: вентиляторная система с увлажняющим занавесом<br>• Теплоизоляция: внутренняя и боковая защита от теплопотерь<br>• Солнцезащита: внешние и внутренние системы затенения<br>• Автоматизация: полный цикл управления микроклиматом'
+            },
+            {
+                title: 'Теплица из поликарбоната',
+                image: 'https://sun9-71.userapi.com/s/v1/ig2/d81iv0NDBmRYhqDGlWSZaKAdpQesHRdeET77MaIlo7sVZZG0lBytKCGnM0-jBnMKpZeNuOj4SvvlkMyvR6vXl9zR.jpg?quality=95&as=32x22,48x32,72x49,108x73,160x108,240x162,360x243,480x324,540x365,640x432,720x486,948x640&from=bu&u=rYhJ8szlmHfJ5yGlWDjheBVagW92FmAHDgcMywiL5sw',
+                description: 'Мы предлагаем современные теплицы промышленного класса с инновационным покрытием из поликарбонатных панелей. Данная	конструкция сочетает в себе надежность классической стеклянной теплицы и передовые энергосберегающие технологии,	создавая контролируемый микроклимат для максимальной продуктивности в любое время	года.<br><br><b>Ключевые характеристики и комплектация:</b><br><br><b>Конструкция:</b> Прочная каркасная система с	пролётом от 9,6 до 12 метров и шириной секций 4 или 8 метров для оптимального использования	площади.<br><br><b>Покрытие:</b> Сотовые поликарбонатные (PC) панели, обеспечивающие высокую прочность и выдающуюся	теплоизоляцию.<br><br><b>Климат-контроль:</b><br><br><b>Солнцезащита:</b> Комбинированная система внешних и внутренних	экранов для точного управления уровнем освещенности и защиты растений от перегрева.<br><br><b>Теплоизоляция:</b>	Внутренняя и боковая теплоизоляционные шторы минимизируют теплопотери в зимний период и снижают	энергозатраты.<br><br><b>Вентиляция и охлаждение:</b> Мощная вентиляторная система с испарительным увлажняющим занавесом	(система туманообразования) для эффективного охлаждения и поддержания оптимальной влажности	летом.<br><br><b>Управление:</b> Комплексная автоматическая электрическая система, которая централизованно управляет всеми процессами: вентиляцией, отоплением, затенением, поливом и увлажнением.'
+            },
+            {
+                title: 'Стеклянная теплица',
+                image: 'https://sun9-12.userapi.com/s/v1/ig2/R18J0hb-Ob1H4OHxOw0vW7XooKIQF2uqFPeMUobZjKuKbf5OmyTcczBDhES8rdGtIpuVtRl3azFNiJMbsDSZJ3FW.jpg?quality=95&as=32x22,48x33,72x49,108x74,160x109,240x163,360x245,480x327,540x368,640x436,720x490,1080x736,1280x872&from=bu&u=wBU0aE2z5VJwFGseLGPW3HzJPp_Zl5ItKDwwOVC_GHk&cs=1080x0',
+                description: 'Мы предлагаем проектирование и строительство профессиональных теплиц с покрытием из закаленного стекла. Данная	конструкция предназначена для интенсивного растениеводства и сочетает в себе эталонную светопропускаемость,	долговечность и возможности для полной автоматизации	процессов.<br><br><b>Ключевые характеристики и комплектация:</b><br><br><b>Конструкция:</b> Прочный металлический	каркас, рассчитанный на значительные снеговые и ветровые нагрузки. Пролет конструкции составляет от 9,6 до 12 метров с	шириной секций 4 или 8 метров, что позволяет оптимально использовать площадь и организовать внутреннее	пространство.<br><br><b>Покрытие:</b> Закаленное безопасное стекло. Этот материал обладает высокой прочностью и	прозрачностью, обеспечивая светопропускание на уровне 89% и выше, что критически важно для фотосинтеза и урожайности	культур.<br><br><b>Система климат-контроля:</b><br><br><b>Солнцезащита:</b> Комбинированная система внешних и внутренних	экранов для точного управления солнечной радиацией и защиты растений от перегрева.<br><br><b>Теплоизоляция:</b>	Внутренние и боковые теплоизоляционные шторы для минимизации теплопотерь в отопительный сезон и значительного снижения	энергозатрат.<br><br><b>Вентиляция и увлажнение:</b> Мощная вентиляторная система с испарительным увлажняющим занавесом	для эффективного охлаждения и поддержания оптимального уровня влажности воздуха.<br><br><b>Управление:</b> Комплексная	автоматическая электрическая система, которая централизованно управляет всеми процессами: вентиляцией, отоплением,	затенением, поливом и увлажнением.'
+            },
+            {
+                title: 'Система беспочвенного выращивания на кокосовом субстрате',
+                image: 'https://sun9-12.userapi.com/s/v1/ig2/MKuf_bOJJyx0Q6wS2qZ1obDcltanzrCeolI8XArrqWIFthjIlzgT9VzxlzXveUuJ9LQIzlTO9qkTV5-h6GQbpv9W.jpg?quality=95&as=32x24,48x37,72x55,108x83,160x122,240x184,360x275,480x367,540x413,640x490,694x531&from=bu&u=DYBV_k-kiHWb0q6StKWxQjLq5cQdEYa3xE3dKx_3i3E',
+                description: '<b>Современная и эффективная технология для высоких урожаев овощей и ягод</b><br><br>Наша услуга включает проектирование и оснащение вашей теплицы или фермы готовой системой беспочвенного выращивания на основе кокосового волокна. Это готовое решение для получения чистых, здоровых и обильных урожаев таких культур как томаты, огурцы, перцы, клубника и другие.<br><br><b>Что входит в систему:</b><br><br><b>Экологичный кокосовый субстрат:</b><br><br>Используется инертный, волокнистый кокосовый субстрат, идеально подходящий для развития корневой системы. Он обеспечивает отличную влаго- и воздухоемкость, предотвращая загнивание корней.<br><br><b>Прочная и долговечная конструкция:</b><br><br><b>Каркас</b><br>Изготовлен из горячеоцинкованной стали, что гарантирует устойчивость к коррозии и длительный срок службы во влажной среде теплицы.<br><br><b>Посадочные лотки</b><br>Произведены из качественного пищевого ПВХ, безопасны для растений и удобны в обслуживании.<br><br><b>рунтовое покрытие</b><br>Специальная пленка, которая укладывается на почву, чтобы изолировать зону выращивания от сорняков и болезней.<br><br><b>Специализированные подвесные конструкции:</b><br>Предусмотрены надежные системы подвязки и поддержки для высокорослых овощных культур (томаты, огурцы), позволяющие эффективно использовать вертикальное пространство.<br><br><b>Точная система полива и питания:</b><br><b>Сердце системы</b>	— капельный полив с интегрированной подачей удобрений (фертигация). Это обеспечивает точную подачу воды и питательных	веществ прямо к корням каждого растения в нужном количестве и в нужное время.'
+            }
+        ];
+
+        // Переключение категорий
+        const navButtons = document.querySelectorAll('.nav-button');
+        const greenhousesList = document.getElementById('greenhouses-list');
+        const fertilizersList = document.getElementById('fertilizers-list');
+        const equipmentList = document.getElementById('equipment-list');
+        const greenhouseDetail = document.getElementById('greenhouse-detail');
+        const backButton = document.getElementById('backButton');
+
+        navButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                navButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                const category = button.getAttribute('data-category');
+                
+                greenhousesList.classList.add('hidden');
+                fertilizersList.classList.add('hidden');
+                equipmentList.classList.add('hidden');
+                greenhouseDetail.classList.remove('active');
+                backButton.style.display = 'none';
+
+                if (category === 'greenhouses') {
+                    greenhousesList.classList.remove('hidden');
+                } else if (category === 'fertilizers') {
+                    fertilizersList.classList.remove('hidden');
+                } else if (category === 'equipment') {
+                    equipmentList.classList.remove('hidden');
+                }
+            });
+        });
+
+        // Показать детали теплицы
+        function showDetail(index) {
+            const greenhouse = greenhousesData[index];
+            document.getElementById('detail-image').src = greenhouse.image;
+            document.getElementById('detail-title').textContent = greenhouse.title;
+            document.getElementById('detail-text').innerHTML = greenhouse.description;
+
+            greenhousesList.classList.add('hidden');
+            greenhouseDetail.classList.add('active');
+            backButton.style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        // Вернуться назад
+        function goBack() {
+            greenhouseDetail.classList.remove('active');
+            greenhousesList.classList.remove('hidden');
+            backButton.style.display = 'none';
+            window.scrollTo(0, 0);
+        }
+
+        // Предотвращение закрытия при свайпе вниз (для Telegram WebApp)
+        let startY = 0;
+        document.addEventListener('touchstart', (e) => {
+            startY = e.touches[0].clientY;
+        }, { passive: true });
+
+        document.addEventListener('touchmove', (e) => {
+            const currentY = e.touches[0].clientY;
+            const diff = currentY - startY;
+            
+            if (diff > 0 && window.scrollY <= 0) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // Оптимизация загрузки изображений
+        document.addEventListener('DOMContentLoaded', function() {
+            const images = document.querySelectorAll('img');
+            images.forEach(img => {
+                img.loading = 'lazy';
+            });
+        });
+	</script>
+</body>
+
+</html>
